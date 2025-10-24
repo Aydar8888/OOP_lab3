@@ -1,30 +1,45 @@
-cmake_minimum_required(VERSION 3.10)
-project(lab3) 
+cmake_minimum_required(VERSION 3.14)
+project(lab3)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=maybe-uninitialized")
-
+# ---- GoogleTest ----
 include(FetchContent)
 FetchContent_Declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG v1.15.0
-  TLS_VERIFY false
+  GIT_TAG        v1.15.2
+  TLS_VERIFY     false
 )
 FetchContent_MakeAvailable(googletest)
 
 
-# add_library(${PROJECT_NAME}_lib src/bitstring.cpp)
-add_executable(${PROJECT_NAME}_exe main.cpp)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(${PROJECT_NAME}_exe PRIVATE ${PROJECT_NAME}_lib)
+
+add_library(lab3_lib
+    src/figure.cpp
+    src/rhomb.cpp
+    src/trapezoid.cpp
+    src/rectangle.cpp
+    src/array.cpp
+)
+target_include_directories(lab3_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+
+add_executable(lab3 main.cpp)
+target_link_libraries(lab3 PRIVATE lab3_lib)
 
 
 enable_testing()
 
-add_executable(${PROJECT_NAME}_tests test/tests_l3.cpp)
-target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${PROJECT_NAME}_lib gtest_main)
+add_executable(tests test/tests_l3.cpp)
+target_link_libraries(tests PRIVATE
+    lab3_lib
+    GTest::gtest_main
+)
 
-add_test(NAME ${PROJECT_NAME}_MyProjectTests COMMAND ${PROJECT_NAME}_tests)
+include(GoogleTest)
+gtest_discover_tests(tests)
